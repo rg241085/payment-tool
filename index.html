@@ -1,180 +1,414 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Tool - Live & Auto Days 📅</title>
+    <title>Payment Tool - Live Sync 🟢</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
         /* Settings Toggle */
-        .settings-toggle-btn { background-color: #607d8b; color: white; padding: 10px; width: 100%; text-align: left; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .settings-toggle-btn:hover { background-color: #546e7a; }
-        #settingsArea { display: none; margin-top: 15px; padding: 15px; background-color: #eceff1; border-radius: 5px; border: 1px solid #cfd8dc; }
+        .settings-toggle-btn {
+            background-color: #607d8b;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .settings-box label { font-weight: bold; color: #37474f; display: block; margin-bottom: 8px; }
-        
-        input[type="text"], textarea { width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 8px; font-size: 14px; box-sizing: border-box; }
-        textarea.bank-area { height: 110px; resize: vertical; font-family: monospace; }
-        input.firm-input { font-weight: bold; color: #333; font-size: 15px; }
+        .settings-toggle-btn:hover {
+            background-color: #546e7a;
+        }
 
-        .input-section { margin-top: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
-        .raw-data-area { height: 100px; font-family: monospace; border: 2px solid #90caf9; }
-        
-        .btn-container { display: flex; gap: 10px; margin-top: 10px; }
-        .gen-btn { flex: 2; background-color: #007bff; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        .clear-all-btn { flex: 1; background-color: #dc3545; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        #settingsArea {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #eceff1;
+            border-radius: 5px;
+            border: 1px solid #cfd8dc;
+        }
 
-        .table-responsive { overflow-x: auto; padding-bottom: 100px; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1250px; }
-        th, td { border: 1px solid #ddd; padding: 8px; vertical-align: middle; }
-        th { background-color: #343a40; color: white; padding: 12px; text-align: left; }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
 
-        .edit-field { width: 100%; padding: 6px; border: 1px solid #aaa; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
-        .edit-field:focus { border-color: #007bff; background-color: #fffde7; outline: none; }
-        
-        .btn-group { display: flex; gap: 5px; }
-        .wa-btn { background-color: #25D366; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 5px; white-space: nowrap; flex: 1; }
-        .del-btn { background-color: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap; }
+        .settings-box label {
+            font-weight: bold;
+            color: #37474f;
+            display: block;
+            margin-bottom: 8px;
+        }
 
-        #connectionStatus { font-size: 12px; float: right; margin-left: 10px; }
-        .status-online { color: green; font-weight: bold; animation: blink 2s infinite; }
-        .status-offline { color: red; font-weight: bold; }
-        @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;} }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea.bank-area {
+            height: 110px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        input.firm-input {
+            font-weight: bold;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .input-section {
+            margin-top: 20px;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+
+        .raw-data-area {
+            height: 100px;
+            font-family: monospace;
+            border: 2px solid #90caf9;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .gen-btn {
+            flex: 2;
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .clear-all-btn {
+            flex: 1;
+            background-color: #dc3545;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            padding-bottom: 100px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1250px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .edit-field {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .edit-field:focus {
+            border-color: #007bff;
+            background-color: #fffde7;
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .wa-btn {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .del-btn {
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        #connectionStatus {
+            font-size: 12px;
+            float: right;
+            margin-left: 10px;
+        }
+
+        .status-online {
+            color: green;
+            font-weight: bold;
+            animation: blink 2s infinite;
+        }
+
+        .status-offline {
+            color: red;
+            font-weight: bold;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
 
         /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center; }
-        .number-btn { display: block; width: 100%; padding: 12px; margin-bottom: 10px; background-color: #25D366; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .cancel-btn { background-color: #aaa; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
 
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .number-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background-color: #aaa;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Payment Tool 🚀 <span id="connectionStatus" class="status-offline">Connecting...</span></h2>
+    <div class="container">
+        <h2>Payment Tool 🚀 <span id="connectionStatus" class="status-offline">Connecting...</span></h2>
 
-    <button class="settings-toggle-btn" onclick="toggleSettings()">
-        <span>⚙️ Edit Bank Details & Firm Name</span>
-        <span>▼</span>
-    </button>
+        <button class="settings-toggle-btn" onclick="toggleSettings()">
+            <span>⚙️ Edit Bank Details & Firm Name</span>
+            <span>▼</span>
+        </button>
 
-    <div id="settingsArea">
-        <div class="settings-grid">
-            <div class="settings-box">
-                <label>Firm Name:</label>
-                <input type="text" id="firmName" class="firm-input" value="RAVI KUMAR DEEPAK KUMAR" onchange="updateSettings()">
-            </div>
-            <div class="settings-box">
-                <label>Bank Details:</label>
-                <textarea id="bankDetails" class="bank-area" onchange="updateSettings()">🏦 *Bank Details:*
+        <div id="settingsArea">
+            <div class="settings-grid">
+                <div class="settings-box">
+                    <label>Firm Name:</label>
+                    <input type="text" id="firmName" class="firm-input" value="RAVI KUMAR DEEPAK KUMAR"
+                        onchange="updateSettings()">
+                </div>
+                <div class="settings-box">
+                    <label>Bank Details:</label>
+                    <textarea id="bankDetails" class="bank-area" onchange="updateSettings()">🏦 *Bank Details:*
 Bank: SBI
 A/c No: *32837750647*
 IFSC: *SBIN0031978*
 
 📱 UPI: *9887938518@YBL*</textarea>
+                </div>
             </div>
         </div>
+
+        <div class="input-section">
+            <label style="font-weight:bold;">Tally Data पेस्ट करें:</label>
+            <textarea id="rawData" class="raw-data-area" placeholder="Paste data here..."></textarea>
+            <div class="btn-container">
+                <button class="gen-btn" onclick="processData()">➕ Add to List (Cloud)</button>
+                <button class="clear-all-btn" onclick="clearAllData()">🗑️ Clear All Data</button>
+            </div>
+        </div>
+
+        <div id="outputArea" class="table-responsive"></div>
     </div>
 
-    <div class="input-section">
-        <label style="font-weight:bold;">Tally Data पेस्ट करें:</label>
-        <textarea id="rawData" class="raw-data-area" placeholder="Paste data here..."></textarea>
-        <div class="btn-container">
-            <button class="gen-btn" onclick="processData()">➕ Add to List (Cloud)</button>
-            <button class="clear-all-btn" onclick="clearAllData()">🗑️ Clear All Data</button>
+    <div id="numberModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="font-size:18px; font-weight:bold; margin-bottom:15px;">Select Number</div>
+            <div id="modalButtons"></div>
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
         </div>
     </div>
 
-    <div id="outputArea" class="table-responsive"></div>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-<div id="numberModal" class="modal-overlay">
-    <div class="modal-box">
-        <div style="font-size:18px; font-weight:bold; margin-bottom:15px;">Select Number</div>
-        <div id="modalButtons"></div>
-        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
-    </div>
-</div>
+        // ----------------------------------------------------
+        // ✅ CONFIG
+        // ----------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMD2fjeInH_Z__n_lsAkhdKwHGxp40Xcs",
+            authDomain: "mypaymenttool-f4374.firebaseapp.com",
+            databaseURL: "https://mypaymenttool-f4374-default-rtdb.firebaseio.com",
+            projectId: "mypaymenttool-f4374",
+            storageBucket: "mypaymenttool-f4374.firebasestorage.app",
+            messagingSenderId: "521905600380",
+            appId: "1:521905600380:web:5ad68419e8962a1296d6f9"
+        };
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
-
-    // ----------------------------------------------------
-    // ✅ YOUR SPECIFIC FIREBASE CONFIGURATION
-    // ----------------------------------------------------
-    const firebaseConfig = {
-      apiKey: "AIzaSyDMD2fjeInH_Z__n_lsAkhdKwHGxp40Xcs",
-      authDomain: "mypaymenttool-f4374.firebaseapp.com",
-      databaseURL: "https://mypaymenttool-f4374-default-rtdb.firebaseio.com",
-      projectId: "mypaymenttool-f4374",
-      storageBucket: "mypaymenttool-f4374.firebasestorage.app",
-      messagingSenderId: "521905600380",
-      appId: "1:521905600380:web:5ad68419e8962a1296d6f9"
-    };
-    // ----------------------------------------------------
-
-    let app, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getDatabase(app);
-        document.getElementById('connectionStatus').innerText = "Online 🟢";
-        document.getElementById('connectionStatus').className = "status-online";
-    } catch(e) {
-        console.error("Firebase Connection Failed", e);
-        document.getElementById('connectionStatus').innerText = "Error 🔴";
-    }
-
-    const settingsRef = ref(db, 'settings');
-    const listRef = ref(db, 'paymentList');
-
-    // --- HELPER: CALCULATE DAYS ---
-    window.calculateDays = function(dateStr) {
-        if(!dateStr) return 0;
+        let app, db;
         try {
-            // Supports DD/MM/YY or DD/MM/YYYY
-            let parts = dateStr.split(/[\/\-\.]/);
-            if(parts.length < 3) return 0;
-            
-            let day = parseInt(parts[0], 10);
-            let month = parseInt(parts[1], 10) - 1; 
-            let year = parseInt(parts[2], 10);
-            if (year < 100) year += 2000; // Handle 2 digit year
-
-            let billDate = new Date(year, month, day);
-            let today = new Date();
-            
-            // Reset time to midnight
-            billDate.setHours(0,0,0,0);
-            today.setHours(0,0,0,0);
-
-            let diffTime = today - billDate;
-            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays;
-        } catch(e) {
-            return 0;
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            document.getElementById('connectionStatus').innerText = "Online 🟢";
+            document.getElementById('connectionStatus').className = "status-online";
+        } catch (e) {
+            console.error("Firebase Connection Failed", e);
+            document.getElementById('connectionStatus').innerText = "Error 🔴";
         }
-    }
 
-    // --- 1. LISTEN FOR DATA ---
-    onValue(settingsRef, (snapshot) => {
-        const data = snapshot.val();
-        if(data) {
-            document.getElementById('firmName').value = data.firmName || "";
-            document.getElementById('bankDetails').value = data.bankDetails || "";
+        const settingsRef = ref(db, 'settings');
+        const listRef = ref(db, 'paymentList');
+
+        // --- HELPER: CALCULATE DAYS ---
+        window.calculateDays = function (dateStr) {
+            if (!dateStr) return 0;
+            try {
+                let parts = dateStr.split(/[\/\-\.]/);
+                if (parts.length < 3) return 0;
+                let day = parseInt(parts[0], 10);
+                let month = parseInt(parts[1], 10) - 1;
+                let year = parseInt(parts[2], 10);
+                if (year < 100) year += 2000;
+                let billDate = new Date(year, month, day);
+                let today = new Date();
+                billDate.setHours(0, 0, 0, 0);
+                today.setHours(0, 0, 0, 0);
+                let diffTime = today - billDate;
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            } catch (e) { return 0; }
         }
-    });
 
-    onValue(listRef, (snapshot) => {
-        const data = snapshot.val();
-        const outputDiv = document.getElementById('outputArea');
-        
-        let html = `
+        // --- 1. LISTEN FOR DATA ---
+        onValue(settingsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('firmName').value = data.firmName || "";
+                document.getElementById('bankDetails').value = data.bankDetails || "";
+            }
+        });
+
+        onValue(listRef, (snapshot) => {
+            const data = snapshot.val();
+            // GLOBAL VARIABLE ME SAVE KARENGE
+            window.allPaymentData = data || {};
+
+            const outputDiv = document.getElementById('outputArea');
+
+            let html = `
             <table id="mainTable">
                 <thead>
                     <tr>
@@ -189,14 +423,14 @@ IFSC: *SBIN0031978*
                 </thead>
                 <tbody id="tableBody">`;
 
-        if (data) {
-            Object.keys(data).forEach(key => {
-                const row = data[key];
-                
-                // Calculate Dynamic Days
-                let currentDays = window.calculateDays(row.date);
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const row = data[key];
 
-                html += `<tr>
+                    // Calculate Dynamic Days
+                    let currentDays = window.calculateDays(row.date);
+
+                    html += `<tr>
                     <td><input type="text" class="edit-field" value="${row.party}" onchange="updateRow('${key}', 'party', this.value)"></td>
                     <td><input type="text" class="edit-field inp-mobile" value="${row.mobile}" placeholder="Ex: 98xxxx, 88xxxx" onchange="updateRow('${key}', 'mobile', this.value)"></td>
                     <td><input type="text" class="edit-field" value="${row.date}" onchange="updateRow('${key}', 'date', this.value)"></td>
@@ -209,145 +443,160 @@ IFSC: *SBIN0031978*
                     
                     <td>
                         <div class="btn-group">
-                            <button onclick="window.prepareWhatsApp('${row.party}', '${row.mobile}', '${row.date}', '${row.bill}', '${row.amount}')" class="wa-btn">WhatsApp ➤</button>
+                            <button onclick="window.prepareWhatsApp('${key}')" class="wa-btn">WhatsApp ➤</button>
                             <button onclick="deleteRow('${key}')" class="del-btn">❌</button>
                         </div>
                     </td>
                 </tr>`;
-            });
-        }
-        html += `</tbody></table>`;
-        outputDiv.innerHTML = html;
-    });
-
-    // --- 2. ACTIONS ---
-    window.updateSettings = function() {
-        const firm = document.getElementById('firmName').value;
-        const bank = document.getElementById('bankDetails').value;
-        set(settingsRef, { firmName: firm, bankDetails: bank });
-    }
-
-    window.processData = function() {
-        const textArea = document.getElementById('rawData');
-        const text = textArea.value;
-        if (!text.trim()) { alert("Please paste data."); return; }
-        const lines = text.split('\n');
-        
-        let tempParty = "Unknown";
-
-        lines.forEach(line => {
-            line = line.trim();
-            if (line.startsWith("Party :")) {
-                tempParty = line.split("Party :")[1].replace(/,+$/, '').trim();
-            } else if (line.includes("Dr") || line.includes("Cr")) {
-                let cleanLine = line.replace(/\s+/g, ' ').trim();
-                let parts = cleanLine.split(' ');
-                if(parts.length >= 5) {
-                    try {
-                        let billDate = parts[0]; let billNo = parts[1];
-                        let drIndex = parts.indexOf("Dr") > -1 ? parts.indexOf("Dr") : parts.indexOf("Cr");
-                        let amount = parts[drIndex - 1]; 
-                        
-                        // Note: We don't save 'days' anymore, we calculate it live.
-                        push(listRef, {
-                            party: tempParty,
-                            mobile: "",
-                            date: billDate,
-                            bill: billNo,
-                            amount: amount
-                        });
-                    } catch (e) {}
-                }
+                });
             }
+            html += `</tbody></table>`;
+            outputDiv.innerHTML = html;
         });
-        textArea.value = "";
-    }
 
-    window.updateRow = function(key, field, value) {
-        const updateData = {};
-        updateData[field] = value;
-        update(ref(db, 'paymentList/' + key), updateData);
-    }
-
-    window.deleteRow = function(key) {
-        if(confirm("Delete this row?")) {
-            remove(ref(db, 'paymentList/' + key));
+        // --- 2. ACTIONS ---
+        window.updateSettings = function () {
+            const firm = document.getElementById('firmName').value;
+            const bank = document.getElementById('bankDetails').value;
+            set(settingsRef, { firmName: firm, bankDetails: bank });
         }
-    }
 
-    window.clearAllData = function() {
-        if(confirm("WARNING: This will delete ALL data from ALL devices. Continue?")) {
-            remove(listRef);
+        window.processData = function () {
+            const textArea = document.getElementById('rawData');
+            const text = textArea.value;
+            if (!text.trim()) { alert("Please paste data."); return; }
+            const lines = text.split('\n');
+
+            let tempParty = "Unknown";
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.startsWith("Party :")) {
+                    tempParty = line.split("Party :")[1].replace(/,+$/, '').trim();
+                } else if (line.includes("Dr") || line.includes("Cr")) {
+                    let cleanLine = line.replace(/\s+/g, ' ').trim();
+                    let parts = cleanLine.split(' ');
+                    if (parts.length >= 5) {
+                        try {
+                            let billDate = parts[0]; let billNo = parts[1];
+                            let drIndex = parts.indexOf("Dr") > -1 ? parts.indexOf("Dr") : parts.indexOf("Cr");
+                            let amount = parts[drIndex - 1];
+
+                            push(listRef, {
+                                party: tempParty,
+                                mobile: "",
+                                date: billDate,
+                                bill: billNo,
+                                amount: amount
+                            });
+                        } catch (e) { }
+                    }
+                }
+            });
+            textArea.value = "";
         }
-    }
-    
-    window.toggleSettings = function() {
-        var x = document.getElementById("settingsArea");
-        x.style.display = (x.style.display === "block") ? "none" : "block";
-    }
-</script>
 
-<script>
-    function prepareWhatsApp(party, mobileRaw, date, bill, amount) {
-        // Calculate Days HERE also
-        let days = calculateDays(date);
-
-        let numbers = mobileRaw.split(/[^0-9]+/).filter(n => n.length > 5);
-        let firmName = document.getElementById('firmName').value;
-        let bankInfo = document.getElementById('bankDetails').value;
-        
-        let data = { party, date, bill, amount, days, firmName, bankInfo };
-
-        if (numbers.length > 1) {
-            openModal(numbers, data);
-        } else {
-            let singleNum = numbers.length === 1 ? numbers[0] : "";
-            sendFinalMessage(singleNum, data);
+        window.updateRow = function (key, field, value) {
+            const updateData = {};
+            updateData[field] = value;
+            update(ref(db, 'paymentList/' + key), updateData);
         }
-    }
 
-    function sendFinalMessage(mobile, data) {
-        let msg = `नमस्ते *${data.party}*,\n\nहमारी फर्म *${data.firmName}* की तरफ से यह पेमेंट रिमाइंडर है।\n\nआपका बिल नं: *${data.bill}*\nदिनांक: ${data.date}\nराशि: *₹${data.amount}*\n\nयह भुगतान *${data.days} दिनों* से लंबित है। कृपया नीचे दी गई डिटेल्स पर तुरंत भुगतान करें:\n\n------------------\n${data.bankInfo}\n------------------\n\nधन्यवाद,\n*${data.firmName}*`;
-        let encodedMsg = encodeURIComponent(msg);
-        let url = (mobile.length >= 10) ? `https://wa.me/91${mobile}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
-        window.open(url, '_blank');
-        closeModal();
-    }
+        window.deleteRow = function (key) {
+            if (confirm("Delete this row?")) {
+                remove(ref(db, 'paymentList/' + key));
+            }
+        }
 
-    function openModal(numbers, data) {
-        let modal = document.getElementById('numberModal');
-        let btnContainer = document.getElementById('modalButtons');
-        btnContainer.innerHTML = "";
-        numbers.forEach((num) => {
-            let btn = document.createElement('button');
-            btn.className = 'number-btn';
-            btn.innerText = `Send to: ${num}`;
-            btn.onclick = function() { sendFinalMessage(num, data); };
-            btnContainer.appendChild(btn);
-        });
-        modal.style.display = 'flex';
-    }
-    function closeModal() { document.getElementById('numberModal').style.display = 'none'; }
-    
-    // Helper needed here too
-    function calculateDays(dateStr) {
-        if(!dateStr) return 0;
-        try {
-            let parts = dateStr.split(/[\/\-\.]/);
-            if(parts.length < 3) return 0;
-            let day = parseInt(parts[0], 10);
-            let month = parseInt(parts[1], 10) - 1; 
-            let year = parseInt(parts[2], 10);
-            if (year < 100) year += 2000; 
-            let billDate = new Date(year, month, day);
-            let today = new Date();
-            billDate.setHours(0,0,0,0);
-            today.setHours(0,0,0,0);
-            let diffTime = today - billDate;
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        } catch(e) { return 0; }
-    }
-</script>
+        window.clearAllData = function () {
+            if (confirm("WARNING: This will delete ALL data from ALL devices. Continue?")) {
+                remove(listRef);
+            }
+        }
+
+        window.toggleSettings = function () {
+            var x = document.getElementById("settingsArea");
+            x.style.display = (x.style.display === "block") ? "none" : "block";
+        }
+    </script>
+
+    <script>
+        function prepareWhatsApp(key) {
+            // Retrieve fresh data using key
+            let rowData = window.allPaymentData[key];
+            if (!rowData) { alert("Data error"); return; }
+
+            // Calculate Days
+            let days = calculateDays(rowData.date);
+
+            let mobileRaw = rowData.mobile || "";
+            let numbers = mobileRaw.split(/[^0-9]+/).filter(n => n.length > 5);
+
+            let firmName = document.getElementById('firmName').value;
+            let bankInfo = document.getElementById('bankDetails').value;
+
+            // Construct Data Object
+            let data = {
+                party: rowData.party,
+                date: rowData.date,
+                bill: rowData.bill,
+                amount: rowData.amount,
+                days: days,
+                firmName,
+                bankInfo
+            };
+
+            if (numbers.length > 1) {
+                openModal(numbers, data);
+            } else {
+                let singleNum = numbers.length === 1 ? numbers[0] : "";
+                sendFinalMessage(singleNum, data);
+            }
+        }
+
+        function sendFinalMessage(mobile, data) {
+            let msg = `नमस्ते *${data.party}*,\n\nहमारी फर्म *${data.firmName}* की तरफ से यह पेमेंट रिमाइंडर है।\n\nआपका बिल नं: *${data.bill}*\nदिनांक: ${data.date}\nराशि: *₹${data.amount}*\n\nयह भुगतान *${data.days} दिनों* से लंबित है। कृपया नीचे दी गई डिटेल्स पर तुरंत भुगतान करें:\n\n------------------\n${data.bankInfo}\n------------------\n\nधन्यवाद,\n*${data.firmName}*`;
+            let encodedMsg = encodeURIComponent(msg);
+            let url = (mobile.length >= 10) ? `https://wa.me/91${mobile}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+            window.open(url, '_blank');
+            closeModal();
+        }
+
+        function openModal(numbers, data) {
+            let modal = document.getElementById('numberModal');
+            let btnContainer = document.getElementById('modalButtons');
+            btnContainer.innerHTML = "";
+            numbers.forEach((num) => {
+                let btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.innerText = `Send to: ${num}`;
+                btn.onclick = function () { sendFinalMessage(num, data); };
+                btnContainer.appendChild(btn);
+            });
+            modal.style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('numberModal').style.display = 'none'; }
+
+        // Duplicate Helper for Non-Module Scope
+        function calculateDays(dateStr) {
+            if (!dateStr) return 0;
+            try {
+                let parts = dateStr.split(/[\/\-\.]/);
+                if (parts.length < 3) return 0;
+                let day = parseInt(parts[0], 10);
+                let month = parseInt(parts[1], 10) - 1;
+                let year = parseInt(parts[2], 10);
+                if (year < 100) year += 2000;
+                let billDate = new Date(year, month, day);
+                let today = new Date();
+                billDate.setHours(0, 0, 0, 0);
+                today.setHours(0, 0, 0, 0);
+                let diffTime = today - billDate;
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            } catch (e) { return 0; }
+        }
+    </script>
 
 </body>
+
 </html>
