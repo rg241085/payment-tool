@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Tool - Auto Save 💾</title>
+    <title>Payment Tool - Multi Mobile Support 📱</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -45,6 +45,7 @@
         .edit-field { width: 100%; padding: 6px; border: 1px solid #aaa; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
         .edit-field:focus { border-color: #007bff; background-color: #fffde7; outline: none; }
         .inp-party { font-weight: 600; color: #333; }
+        .inp-mobile { border-color: #28a745; background-color: #fafffb; }
 
         /* Buttons */
         .btn-group { display: flex; gap: 5px; }
@@ -52,8 +53,30 @@
         .wa-btn:hover { background-color: #1ebc57; transform: scale(1.02); }
         .del-btn { background-color: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px; white-space: nowrap; }
 
-        /* Save Indicator */
         #saveStatus { float: right; font-size: 12px; color: green; font-weight: bold; display: none; }
+
+        /* --- MODAL (POPUP) STYLES --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-box {
+            background: white; padding: 25px; border-radius: 8px; width: 400px; max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; }
+        .number-btn {
+            display: block; width: 100%; padding: 12px; margin-bottom: 10px;
+            background-color: #25D366; color: white; border: none; border-radius: 5px;
+            font-size: 16px; font-weight: bold; cursor: pointer; text-decoration: none;
+        }
+        .number-btn:hover { background-color: #1ebc57; }
+        .cancel-btn {
+            background-color: #aaa; color: white; border: none; padding: 8px 20px; 
+            border-radius: 4px; cursor: pointer; margin-top: 10px;
+        }
+        .cancel-btn:hover { background-color: #888; }
+
     </style>
 </head>
 <body>
@@ -96,10 +119,18 @@ IFSC: *SBIN0031978*
     <div id="outputArea" class="table-responsive"></div>
 </div>
 
+<div id="numberModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-title">Select Number (किसे भेजना है?)</div>
+        <div id="modalButtons"></div>
+        <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
 <script>
     // --- 1. Load Data on Page Start ---
     window.onload = function() {
-        loadData(); // Load saved data
+        loadData();
     };
 
     function toggleSettings() {
@@ -115,7 +146,7 @@ IFSC: *SBIN0031978*
                 <thead>
                     <tr>
                         <th style="width: 250px;">Party Name (Editable)</th>
-                        <th style="width: 130px;">Mobile No</th>
+                        <th style="width: 150px;">Mobile No (Use comma for multiple)</th>
                         <th style="width: 100px;">Bill Date</th>
                         <th style="width: 130px;">Bill No</th>
                         <th style="width: 100px;">Amount (₹)</th>
@@ -136,20 +167,13 @@ IFSC: *SBIN0031978*
 
         const lines = text.split('\n');
         createTableHeader();
-        const tableBody = document.getElementById('tableBody');
         
         for (let i = 0; i < lines.length; i++) {
             let line = lines[i].trim();
-            let currentParty = "Unknown"; // Logic reset per line group if needed, but assuming standard format
-
-            // Check if line has Party Name (Simplified logic for block parsing would be better, but sticking to line-by-line for robustness with mixed data)
-            // Note: In Tally paste, Party often comes on one line, transaction on next. 
-            // Since we are iterating, we need to capture party from previous lines if needed.
-            // However, based on previous logic:
             
             if (line.startsWith("Party :")) {
                 let rawName = line.split("Party :")[1];
-                window.tempParty = rawName.replace(/,+$/, '').trim(); // Store in temp variable
+                window.tempParty = rawName.replace(/,+$/, '').trim();
             }
             else if (line.includes("Dr") || line.includes("Cr")) {
                 let cleanLine = line.replace(/\s+/g, ' ').trim();
@@ -162,7 +186,7 @@ IFSC: *SBIN0031978*
                         let drIndex = parts.indexOf("Dr") > -1 ? parts.indexOf("Dr") : parts.indexOf("Cr");
                         let amount = parts[drIndex - 1];
                         let days = parts[parts.length - 1]; 
-                        let partyName = window.tempParty || "Unknown"; // Use stored party
+                        let partyName = window.tempParty || "Unknown";
 
                         addTableRow(partyName, "", billDate, billNo, amount, days);
                     } catch (e) { console.log("Error line"); }
@@ -170,7 +194,7 @@ IFSC: *SBIN0031978*
             }
         }
         textArea.value = "";
-        saveData(); // Save immediately after adding
+        saveData();
     }
 
     // --- Helper to Add Row HTML ---
@@ -178,14 +202,14 @@ IFSC: *SBIN0031978*
         const tableBody = document.getElementById('tableBody');
         let newRow = `<tr>
             <td><input type="text" class="edit-field inp-party" value="${party}" oninput="saveData()"></td>
-            <td><input type="text" class="edit-field inp-mobile" value="${mobile}" placeholder="Mobile..." oninput="saveData()"></td>
+            <td><input type="text" class="edit-field inp-mobile" value="${mobile}" placeholder="Ex: 98xxxx, 88xxxx" oninput="saveData()"></td>
             <td><input type="text" class="edit-field inp-date" value="${date}" oninput="saveData()"></td>
             <td><input type="text" class="edit-field inp-bill" value="${bill}" oninput="saveData()"></td>
             <td><input type="text" class="edit-field inp-amt" value="${amount}" oninput="saveData()"></td>
             <td class="days-val" style="color:red; font-weight:bold;">${days}</td>
             <td>
                 <div class="btn-group">
-                    <button onclick="sendWhatsApp(this)" class="wa-btn">WhatsApp ➤</button>
+                    <button onclick="handleWhatsAppClick(this)" class="wa-btn">WhatsApp ➤</button>
                     <button onclick="removeRow(this)" class="del-btn" title="Remove">❌</button>
                 </div>
             </td>
@@ -193,15 +217,13 @@ IFSC: *SBIN0031978*
         tableBody.insertAdjacentHTML('beforeend', newRow);
     }
 
-    // --- 3. SAVE DATA (LocalStorage) ---
+    // --- 3. SAVE & LOAD DATA ---
     function saveData() {
-        // Save Settings
         let firm = document.getElementById('firmName').value;
         let bank = document.getElementById('bankDetails').value;
         localStorage.setItem('savedFirmName', firm);
         localStorage.setItem('savedBankDetails', bank);
 
-        // Save Table Data
         let rows = [];
         const tableBody = document.getElementById('tableBody');
         if(tableBody) {
@@ -217,16 +239,12 @@ IFSC: *SBIN0031978*
             });
         }
         localStorage.setItem('savedTableData', JSON.stringify(rows));
-
-        // Show 'Saved' indicator momentarily
         let status = document.getElementById('saveStatus');
         status.style.display = 'inline';
         setTimeout(() => { status.style.display = 'none'; }, 1000);
     }
 
-    // --- 4. LOAD DATA (LocalStorage) ---
     function loadData() {
-        // Load Settings
         if(localStorage.getItem('savedFirmName')) {
             document.getElementById('firmName').value = localStorage.getItem('savedFirmName');
         }
@@ -234,7 +252,6 @@ IFSC: *SBIN0031978*
             document.getElementById('bankDetails').value = localStorage.getItem('savedBankDetails');
         }
 
-        // Load Table
         let savedRows = JSON.parse(localStorage.getItem('savedTableData') || '[]');
         if (savedRows.length > 0) {
             createTableHeader();
@@ -247,38 +264,86 @@ IFSC: *SBIN0031978*
     function clearAllData() {
         if(confirm("Are you sure? This will delete everything.")) {
             document.getElementById('outputArea').innerHTML = "";
-            localStorage.removeItem('savedTableData'); // Only clear table, keep settings
+            localStorage.removeItem('savedTableData');
             createTableHeader();
         }
-    }
-
-    function sendWhatsApp(btn) {
-        let firmName = document.getElementById('firmName').value;
-        let bankInfo = document.getElementById('bankDetails').value;
-        let row = btn.closest('tr');
-        
-        let party = row.querySelector('.inp-party').value;
-        let mobile = row.querySelector('.inp-mobile').value.replace(/\D/g, ''); 
-        let date = row.querySelector('.inp-date').value;
-        let bill = row.querySelector('.inp-bill').value;
-        let amount = row.querySelector('.inp-amt').value;
-        let days = row.querySelector('.days-val').innerText;
-
-        let msg = `नमस्ते *${party}*,\n\nहमारी फर्म *${firmName}* की तरफ से यह पेमेंट रिमाइंडर है।\n\nआपका बिल नं: *${bill}*\nदिनांक: ${date}\nराशि: *₹${amount}*\n\nयह भुगतान *${days} दिनों* से लंबित है। कृपया नीचे दी गई डिटेल्स पर तुरंत भुगतान करें:\n\n------------------\n${bankInfo}\n------------------\n\nधन्यवाद,\n*${firmName}*`;
-
-        let encodedMsg = encodeURIComponent(msg);
-        if (mobile.length === 10) mobile = "91" + mobile;
-        let url = (mobile.length >= 10) 
-            ? `https://wa.me/${mobile}?text=${encodedMsg}` 
-            : `https://wa.me/?text=${encodedMsg}`;
-        window.open(url, '_blank');
     }
 
     function removeRow(btn) {
         let row = btn.closest('tr');
         row.remove();
-        saveData(); // Save after deleting
+        saveData();
     }
+
+    // --- 4. MULTI-NUMBER LOGIC ---
+    
+    function handleWhatsAppClick(btn) {
+        let row = btn.closest('tr');
+        let mobileRaw = row.querySelector('.inp-mobile').value;
+        
+        // Split numbers by comma, space, or slash
+        // e.g. "9876543210, 7766554433" -> ["9876543210", "7766554433"]
+        let numbers = mobileRaw.split(/[^0-9]+/).filter(n => n.length > 5);
+
+        // Prepare Data for Message
+        let data = {
+            party: row.querySelector('.inp-party').value,
+            date: row.querySelector('.inp-date').value,
+            bill: row.querySelector('.inp-bill').value,
+            amount: row.querySelector('.inp-amt').value,
+            days: row.querySelector('.days-val').innerText,
+            firmName: document.getElementById('firmName').value,
+            bankInfo: document.getElementById('bankDetails').value
+        };
+
+        if (numbers.length > 1) {
+            // SHOW MODAL if multiple numbers
+            openModal(numbers, data);
+        } else {
+            // SEND DIRECTLY if 0 or 1 number
+            let singleNum = numbers.length === 1 ? numbers[0] : "";
+            sendFinalMessage(singleNum, data);
+        }
+    }
+
+    function sendFinalMessage(mobile, data) {
+        let msg = `नमस्ते *${data.party}*,\n\nहमारी फर्म *${data.firmName}* की तरफ से यह पेमेंट रिमाइंडर है।\n\nआपका बिल नं: *${data.bill}*\nदिनांक: ${data.date}\nराशि: *₹${data.amount}*\n\nयह भुगतान *${data.days} दिनों* से लंबित है। कृपया नीचे दी गई डिटेल्स पर तुरंत भुगतान करें:\n\n------------------\n${data.bankInfo}\n------------------\n\nधन्यवाद,\n*${data.firmName}*`;
+
+        let encodedMsg = encodeURIComponent(msg);
+        
+        if (mobile.length === 10) mobile = "91" + mobile;
+        
+        let url = (mobile.length >= 10) 
+            ? `https://wa.me/${mobile}?text=${encodedMsg}` 
+            : `https://wa.me/?text=${encodedMsg}`;
+
+        window.open(url, '_blank');
+        closeModal();
+    }
+
+    // --- MODAL FUNCTIONS ---
+    function openModal(numbers, data) {
+        let modal = document.getElementById('numberModal');
+        let btnContainer = document.getElementById('modalButtons');
+        btnContainer.innerHTML = ""; // Clear previous
+
+        numbers.forEach((num, index) => {
+            let btn = document.createElement('button');
+            btn.className = 'number-btn';
+            btn.innerText = `Send to: ${num}`;
+            btn.onclick = function() {
+                sendFinalMessage(num, data);
+            };
+            btnContainer.appendChild(btn);
+        });
+
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('numberModal').style.display = 'none';
+    }
+
 </script>
 
 </body>
