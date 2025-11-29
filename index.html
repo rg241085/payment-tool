@@ -1,345 +1,544 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Follow-up Tool (Realtime Firebase)</title>
-
+    <title>Payment Tool - Live Sync 🟢</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
 
-        .settings-toggle-btn { background-color: #607d8b; color: white; padding: 10px; width: 100%; text-align: left; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        #settingsArea { display: none; margin-top: 15px; padding: 15px; background-color: #eceff1; border-radius: 5px; border: 1px solid #cfd8dc; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
 
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
 
-        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        textarea.bank-area { height: 110px; font-family: monospace; }
+        /* Settings Button */
+        .settings-toggle-btn {
+            background-color: #607d8b;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .input-section { margin-top: 20px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
-        .raw-data-area { height: 100px; font-family: monospace; border: 2px solid #90caf9; }
+        .settings-toggle-btn:hover {
+            background-color: #546e7a;
+        }
 
-        .btn-container { display: flex; gap: 10px; margin-top: 10px; }
-        .gen-btn { flex: 2; background-color: #007bff; color: white; padding: 12px; border-radius: 5px; border: none; }
-        .clear-all-btn { flex: 1; background-color: #dc3545; color: white; padding: 12px; border-radius: 5px; border: none; }
+        #settingsArea {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #eceff1;
+            border-radius: 5px;
+            border: 1px solid #cfd8dc;
+        }
 
-        .table-responsive { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1250px; }
-        th, td { border: 1px solid #ddd; padding: 8px; }
-        th { background-color: #343a40; color: white; }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
 
-        .btn-group { display: flex; gap: 5px; }
-        .wa-btn { background-color: #25D366; color: white; padding: 8px 12px; border-radius: 4px; border: none; }
-        .del-btn { background-color: #ff5252; color: white; padding: 8px 12px; border-radius: 4px; border: none; }
+        .settings-box label {
+            font-weight: bold;
+            color: #37474f;
+            display: block;
+            margin-bottom: 8px;
+        }
 
-        #saveStatus { color: green; font-size: 14px; font-weight: bold; display: none; float: right; }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        textarea.bank-area {
+            height: 110px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        input.firm-input {
+            font-weight: bold;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .input-section {
+            margin-top: 20px;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+
+        .raw-data-area {
+            height: 100px;
+            font-family: monospace;
+            border: 2px solid #90caf9;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .gen-btn {
+            flex: 2;
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .gen-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .clear-all-btn {
+            flex: 1;
+            background-color: #dc3545;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .clear-all-btn:hover {
+            background-color: #c82333;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            padding-bottom: 100px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1250px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #343a40;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .edit-field {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .edit-field:focus {
+            border-color: #007bff;
+            background-color: #fffde7;
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .wa-btn {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .del-btn {
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        #connectionStatus {
+            font-size: 12px;
+            float: right;
+            margin-left: 10px;
+        }
+
+        .status-online {
+            color: green;
+            font-weight: bold;
+            animation: blink 2s infinite;
+        }
+
+        .status-offline {
+            color: red;
+            font-weight: bold;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
 
         /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 25px; border-radius: 8px; width: 350px; text-align: center; }
-        .number-btn { width: 100%; padding: 12px; background: #25D366; color: white; border-radius: 5px; border: none; margin-bottom: 10px; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .number-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background-color: #aaa;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <h2>Payment Follow-up Tool 🚀 <span id="saveStatus">Saved ✓</span></h2>
+    <div class="container">
+        <h2>Payment Tool 🚀 <span id="connectionStatus" class="status-offline">Connecting...</span></h2>
 
-    <button class="settings-toggle-btn" onclick="toggleSettings()">
-        <span>⚙️ Edit Bank Details & Firm Name</span><span>▼</span>
-    </button>
+        <button class="settings-toggle-btn" onclick="toggleSettings()">
+            <span>⚙️ Edit Bank Details & Firm Name</span>
+            <span>▼</span>
+        </button>
 
-    <div id="settingsArea">
-        <div class="settings-grid">
-            <div>
-                <label>Firm Name</label>
-                <input id="firmName" value="RAVI KUMAR DEEPAK KUMAR" oninput="saveSettings()">
-            </div>
-            <div>
-                <label>Bank Details</label>
-                <textarea id="bankDetails" class="bank-area" oninput="saveSettings()">🏦 *Bank Details:* 
-Bank: SBI 
-A/c No: *32837750647* 
+        <div id="settingsArea">
+            <div class="settings-grid">
+                <div class="settings-box">
+                    <label>Firm Name:</label>
+                    <input type="text" id="firmName" class="firm-input" value="RAVI KUMAR DEEPAK KUMAR"
+                        onchange="updateSettings()">
+                </div>
+                <div class="settings-box">
+                    <label>Bank Details:</label>
+                    <textarea id="bankDetails" class="bank-area" onchange="updateSettings()">🏦 *Bank Details:*
+Bank: SBI
+A/c No: *32837750647*
 IFSC: *SBIN0031978*
 
 📱 UPI: *9887938518@YBL*</textarea>
+                </div>
             </div>
         </div>
+
+        <div class="input-section">
+            <label style="font-weight:bold;">Tally Data पेस्ट करें:</label>
+            <textarea id="rawData" class="raw-data-area" placeholder="Paste data here..."></textarea>
+            <div class="btn-container">
+                <button class="gen-btn" onclick="processData()">➕ Add to List (Cloud)</button>
+                <button class="clear-all-btn" onclick="clearAllData()">🗑️ Clear All Data</button>
+            </div>
+        </div>
+
+        <div id="outputArea" class="table-responsive"></div>
     </div>
 
-    <div class="input-section">
-        <label><b>Tally Data पेस्ट करें:</b></label>
-        <textarea id="rawData" class="raw-data-area"></textarea>
-
-        <div class="btn-container">
-            <button class="gen-btn" onclick="processData()">➕ Add to List</button>
-            <button class="clear-all-btn" onclick="clearAllData()">🗑️ Clear All</button>
+    <div id="numberModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="font-size:18px; font-weight:bold; margin-bottom:15px;">Select Number</div>
+            <div id="modalButtons"></div>
+            <button class="cancel-btn" onclick="closeModal()">Cancel</button>
         </div>
     </div>
 
-    <div id="outputArea" class="table-responsive"></div>
-</div>
+    <script type="module">
+        // Import functions from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-<!-- Modal -->
-<div id="numberModal" class="modal-overlay">
-    <div class="modal-box">
-        <h3>किस नंबर पर भेजना है?</h3>
-        <div id="modalButtons"></div>
-        <button onclick="closeModal()">Cancel</button>
-    </div>
-</div>
+        // ✅ YOUR CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMD2fjeInH_Z__n_lsAkhdKwHGxp40Xcs",
+            authDomain: "mypaymenttool-f4374.firebaseapp.com",
+            databaseURL: "https://mypaymenttool-f4374-default-rtdb.firebaseio.com",
+            projectId: "mypaymenttool-f4374",
+            storageBucket: "mypaymenttool-f4374.firebasestorage.app",
+            messagingSenderId: "521905600380",
+            appId: "1:521905600380:web:5ad68419e8962a1296d6f9"
+        };
 
-<!-- Firebase CDN -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-<script>
-// -----------------------------------------------------
-// 1) Firebase Config (Your config inserted here)
-// -----------------------------------------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyDM92XNMKhzYTFWD323__5oVtLB2Y4gCAw",
-  authDomain: "payment-3664c.firebaseapp.com",
-  projectId: "payment-3664c",
-  storageBucket: "payment-3664c.firebasestorage.app",
-  messagingSenderId: "1051370161254",
-  appId: "1:1051370161254:web:d45afdff0d4a3ca1e0d9a7",
-  measurementId: "G-FBT5W16L2Z"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Firestore paths
-const settingsDoc = db.collection("payment_meta").doc("settings");
-const rowsCollection = db.collection("payment_meta").doc("workspace").collection("rows");
-
-// -----------------------------------------------------
-// Load settings realtime
-// -----------------------------------------------------
-window.onload = function () {
-    loadSettingsRealtime();
-    loadRowsRealtime();
-};
-
-// Settings realtime listener
-function loadSettingsRealtime() {
-    settingsDoc.onSnapshot(doc => {
-        if (doc.exists) {
-            let s = doc.data();
-            document.getElementById("firmName").value = s.firm || "";
-            document.getElementById("bankDetails").value = s.bank || "";
+        // Initialize Firebase
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            document.getElementById('connectionStatus').innerText = "Online 🟢";
+            document.getElementById('connectionStatus').className = "status-online";
+        } catch (e) {
+            console.error("Firebase Connection Failed", e);
+            document.getElementById('connectionStatus').innerText = "Error 🔴";
         }
-    });
-}
 
-// Save settings
-function saveSettings() {
-    settingsDoc.set({
-        firm: document.getElementById("firmName").value,
-        bank: document.getElementById("bankDetails").value,
-        updated: new Date()
-    }, { merge: true });
+        // --- References ---
+        const settingsRef = ref(db, 'settings');
+        const listRef = ref(db, 'paymentList');
 
-    showSaved();
-}
-
-// -----------------------------------------------------
-// Table maker
-// -----------------------------------------------------
-function makeTableIfNotExists() {
-    if (!document.getElementById("mainTable")) {
-        document.getElementById("outputArea").innerHTML = `
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th>Party</th>
-                    <th>Mobile</th>
-                    <th>Date</th>
-                    <th>Bill</th>
-                    <th>Amount</th>
-                    <th>Days</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>`;
-    }
-}
-
-// -----------------------------------------------------
-// Add row to DOM
-// -----------------------------------------------------
-function addRowDOM(id, data) {
-    makeTableIfNotExists();
-
-    let row = document.querySelector(`tr[data-id='${id}']`);
-    let html = `
-    <tr data-id="${id}">
-        <td><input data-f="party" value="${data.party}" oninput="updateRow('${id}','party', this.value)"></td>
-        <td><input data-f="mobile" value="${data.mobile}" oninput="updateRow('${id}','mobile', this.value)"></td>
-        <td><input data-f="date" value="${data.date}" oninput="updateRow('${id}','date', this.value)"></td>
-        <td><input data-f="bill" value="${data.bill}" oninput="updateRow('${id}','bill', this.value)"></td>
-        <td><input data-f="amount" value="${data.amount}" oninput="updateRow('${id}','amount', this.value)"></td>
-        <td style="color:red; font-weight:bold;">${data.days}</td>
-        <td>
-            <button class="wa-btn" onclick="whatsappSend(this)">WhatsApp</button>
-            <button class="del-btn" onclick="deleteRow('${id}')">❌</button>
-        </td>
-    </tr>`;
-
-    if (row) row.outerHTML = html;
-    else document.getElementById("tableBody").insertAdjacentHTML("beforeend", html);
-}
-
-// -----------------------------------------------------
-// Realtime listener for rows
-// -----------------------------------------------------
-function loadRowsRealtime() {
-    rowsCollection.orderBy("created").onSnapshot(snapshot => {
-        snapshot.docChanges().forEach(change => {
-            let id = change.doc.id;
-            let data = change.doc.data();
-
-            if (change.type == "added" || change.type == "modified") {
-                addRowDOM(id, data);
-            } else if (change.type == "removed") {
-                let row = document.querySelector(`tr[data-id='${id}']`);
-                if (row) row.remove();
+        // --- 1. LISTEN FOR DATA (Real-time) ---
+        onValue(settingsRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                document.getElementById('firmName').value = data.firmName || "";
+                document.getElementById('bankDetails').value = data.bankDetails || "";
             }
         });
-    });
-}
 
-// -----------------------------------------------------
-// Update individual cell
-// -----------------------------------------------------
-function updateRow(id, field, value) {
-    rowsCollection.doc(id).update({ [field]: value });
-    showSaved();
-}
+        onValue(listRef, (snapshot) => {
+            const data = snapshot.val();
+            const outputDiv = document.getElementById('outputArea');
 
-// -----------------------------------------------------
-// Process Tally
-// -----------------------------------------------------
-function processData() {
-    let raw = document.getElementById("rawData").value.trim();
-    if (!raw) return alert("Paste Tally data first");
+            let html = `
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th style="width: 250px;">Party Name</th>
+                        <th style="width: 150px;">Mobile No</th>
+                        <th style="width: 100px;">Bill Date</th>
+                        <th style="width: 130px;">Bill No</th>
+                        <th style="width: 100px;">Amount (₹)</th>
+                        <th style="width: 70px;">Days</th>
+                        <th style="width: 180px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">`;
 
-    let lines = raw.split("\n");
-    let tempParty = "";
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const row = data[key];
+                    html += `<tr>
+                    <td><input type="text" class="edit-field" value="${row.party}" onchange="updateRow('${key}', 'party', this.value)"></td>
+                    <td><input type="text" class="edit-field inp-mobile" value="${row.mobile}" placeholder="Ex: 98xxxx, 88xxxx" onchange="updateRow('${key}', 'mobile', this.value)"></td>
+                    <td><input type="text" class="edit-field" value="${row.date}" onchange="updateRow('${key}', 'date', this.value)"></td>
+                    <td><input type="text" class="edit-field" value="${row.bill}" onchange="updateRow('${key}', 'bill', this.value)"></td>
+                    <td><input type="text" class="edit-field" value="${row.amount}" onchange="updateRow('${key}', 'amount', this.value)"></td>
+                    <td class="days-val" style="color:red; font-weight:bold;">${row.days}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button onclick="window.prepareWhatsApp('${row.party}', '${row.mobile}', '${row.date}', '${row.bill}', '${row.amount}', '${row.days}')" class="wa-btn">WhatsApp ➤</button>
+                            <button onclick="deleteRow('${key}')" class="del-btn">❌</button>
+                        </div>
+                    </td>
+                </tr>`;
+                });
+            }
+            html += `</tbody></table>`;
+            outputDiv.innerHTML = html;
+        });
 
-    lines.forEach(line => {
-        line = line.trim();
-        if (line.startsWith("Party :")) {
-            tempParty = line.replace("Party :", "").trim();
-        } else if (line.includes("Dr") || line.includes("Cr")) {
-            let parts = line.replace(/\s+/g, " ").split(" ");
-            let date = parts[0];
-            let bill = parts[1];
-            let drIndex = parts.findIndex(x => x == "Dr" || x == "Cr");
-            let amount = parts[drIndex - 1];
-            let days = parts[parts.length - 1];
-
-            rowsCollection.add({
-                party: tempParty,
-                mobile: "",
-                date: date,
-                bill: bill,
-                amount: amount,
-                days: days,
-                created: new Date()
-            });
+        // --- 2. ACTIONS ---
+        window.updateSettings = function () {
+            const firm = document.getElementById('firmName').value;
+            const bank = document.getElementById('bankDetails').value;
+            set(settingsRef, { firmName: firm, bankDetails: bank });
         }
-    });
 
-    document.getElementById("rawData").value = "";
-    showSaved();
-}
+        window.processData = function () {
+            const textArea = document.getElementById('rawData');
+            const text = textArea.value;
+            if (!text.trim()) { alert("Please paste data."); return; }
+            const lines = text.split('\n');
 
-// -----------------------------------------------------
-// Delete row
-// -----------------------------------------------------
-function deleteRow(id) {
-    if (!confirm("Delete permanently?")) return;
-    rowsCollection.doc(id).delete();
-}
+            let tempParty = "Unknown";
 
-// -----------------------------------------------------
-// Clear all rows
-// -----------------------------------------------------
-async function clearAllData() {
-    if (!confirm("Delete ALL DATA?")) return;
-    let snap = await rowsCollection.get();
-    let batch = db.batch();
-    snap.forEach(d => batch.delete(d.ref));
-    await batch.commit();
-    showSaved();
-}
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.startsWith("Party :")) {
+                    tempParty = line.split("Party :")[1].replace(/,+$/, '').trim();
+                } else if (line.includes("Dr") || line.includes("Cr")) {
+                    let cleanLine = line.replace(/\s+/g, ' ').trim();
+                    let parts = cleanLine.split(' ');
+                    if (parts.length >= 5) {
+                        try {
+                            let billDate = parts[0]; let billNo = parts[1];
+                            let drIndex = parts.indexOf("Dr") > -1 ? parts.indexOf("Dr") : parts.indexOf("Cr");
+                            let amount = parts[drIndex - 1]; let days = parts[parts.length - 1];
 
-// -----------------------------------------------------
-// WhatsApp Modal + Send
-// -----------------------------------------------------
-function whatsappSend(btn) {
-    let tr = btn.closest("tr");
-    let mobileText = tr.querySelector("input[data-f='mobile']").value;
+                            push(listRef, {
+                                party: tempParty,
+                                mobile: "",
+                                date: billDate,
+                                bill: billNo,
+                                amount: amount,
+                                days: days
+                            });
+                        } catch (e) { }
+                    }
+                }
+            });
+            textArea.value = "";
+        }
 
-    let nums = mobileText.split(/[^0-9]+/).filter(x => x.length >= 10);
+        window.updateRow = function (key, field, value) {
+            const updateData = {};
+            updateData[field] = value;
+            update(ref(db, 'paymentList/' + key), updateData);
+        }
 
-    let data = {
-        party: tr.querySelector("input[data-f='party']").value,
-        date: tr.querySelector("input[data-f='date']").value,
-        bill: tr.querySelector("input[data-f='bill']").value,
-        amt: tr.querySelector("input[data-f='amount']").value,
-        days: tr.children[5].innerText,
-        firm: document.getElementById("firmName").value,
-        bank: document.getElementById("bankDetails").value
-    };
+        window.deleteRow = function (key) {
+            if (confirm("Delete this row?")) {
+                remove(ref(db, 'paymentList/' + key));
+            }
+        }
 
-    if (nums.length > 1) {
-        openModal(nums, data);
-    } else {
-        sendNow(nums[0], data);
-    }
-}
+        window.clearAllData = function () {
+            if (confirm("WARNING: This will delete ALL data from ALL devices. Continue?")) {
+                remove(listRef);
+            }
+        }
 
-function sendNow(num, d) {
-    let m = `नमस्ते *${d.party}*,\n\nआपका बिल *${d.bill}* दिनांक *${d.date}* राशि *₹${d.amt}* ${d.days} दिनों से लंबित है।\n\n${d.bank}\n\nधन्यवाद\n${d.firm}`;
-    let url = `https://wa.me/91${num}?text=${encodeURIComponent(m)}`;
-    window.open(url, "_blank");
-    closeModal();
-}
+        window.toggleSettings = function () {
+            var x = document.getElementById("settingsArea");
+            x.style.display = (x.style.display === "block") ? "none" : "block";
+        }
+    </script>
 
-function openModal(list, data) {
-    document.getElementById("modalButtons").innerHTML = "";
-    list.forEach(n => {
-        let b = document.createElement("button");
-        b.className = "number-btn";
-        b.innerText = n;
-        b.onclick = () => sendNow(n, data);
-        document.getElementById("modalButtons").appendChild(b);
-    });
-    document.getElementById("numberModal").style.display = "flex";
-}
+    <script>
+        function prepareWhatsApp(party, mobileRaw, date, bill, amount, days) {
+            let numbers = mobileRaw.split(/[^0-9]+/).filter(n => n.length > 5);
+            let firmName = document.getElementById('firmName').value;
+            let bankInfo = document.getElementById('bankDetails').value;
+            let data = { party, date, bill, amount, days, firmName, bankInfo };
 
-function closeModal() {
-    document.getElementById("numberModal").style.display = "none";
-}
+            if (numbers.length > 1) {
+                openModal(numbers, data);
+            } else {
+                let singleNum = numbers.length === 1 ? numbers[0] : "";
+                sendFinalMessage(singleNum, data);
+            }
+        }
 
-// -----------------------------------------------------
-function toggleSettings() {
-    let s = document.getElementById("settingsArea");
-    s.style.display = s.style.display === "block" ? "none" : "block";
-}
+        function sendFinalMessage(mobile, data) {
+            let msg = `नमस्ते *${data.party}*,\n\nहमारी फर्म *${data.firmName}* की तरफ से यह पेमेंट रिमाइंडर है।\n\nआपका बिल नं: *${data.bill}*\nदिनांक: ${data.date}\nराशि: *₹${data.amount}*\n\nयह भुगतान *${data.days} दिनों* से लंबित है। कृपया नीचे दी गई डिटेल्स पर तुरंत भुगतान करें:\n\n------------------\n${data.bankInfo}\n------------------\n\nधन्यवाद,\n*${data.firmName}*`;
+            let encodedMsg = encodeURIComponent(msg);
+            let url = (mobile.length >= 10) ? `https://wa.me/91${mobile}?text=${encodedMsg}` : `https://wa.me/?text=${encodedMsg}`;
+            window.open(url, '_blank');
+            closeModal();
+        }
 
-function showSaved() {
-    let x = document.getElementById("saveStatus");
-    x.style.display = "inline";
-    setTimeout(() => x.style.display = "none", 1000);
-}
-</script>
+        function openModal(numbers, data) {
+            let modal = document.getElementById('numberModal');
+            let btnContainer = document.getElementById('modalButtons');
+            btnContainer.innerHTML = "";
+            numbers.forEach((num) => {
+                let btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.innerText = `Send to: ${num}`;
+                btn.onclick = function () { sendFinalMessage(num, data); };
+                btnContainer.appendChild(btn);
+            });
+            modal.style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('numberModal').style.display = 'none'; }
+    </script>
 
 </body>
+
 </html>
